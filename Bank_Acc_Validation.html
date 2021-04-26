@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank_Data_Validation</title>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous"> -->
+    <!-- JavaScript Bundle with Popper -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script> -->
+    <style type="text/css">
+    body{
+        background-color : rgb(241, 240, 235);
+        padding: 20px;
+        margin-left: 500px;
+    }
+    h3{
+        text-align: justify ;
+        margin-bottom: 5px;
+        margin-top: 50px;
+        margin-left: 50px;
+    }
+    table, th, td {
+    border: 2px solid black;
+    border-collapse: collapse;
+    border-style: hidden;
+    }
+    th,td{
+        padding: 10px;
+        background-color: turquoise;
+    }
+    th {
+    text-align: left;
+    }
+    </style>
+
+</head>
+<body>
+<h3>Bank Data Validation</h3>
+<table id="table1"> 
+<!-- <caption>Bank Validation</caption> -->
+<tr><td>Bank ID:</td><td><input type="text" id="bank_field"    value="Enter Bank id" minlength="5" maxlength="5" required onfocus="this.value=''"></td> </tr><br>
+ <tr><td>Account ID:</td><td> <input type="text"  id="account_field" value="Enter Account id" minlength="8" maxlength="11" required onfocus="this.value=''"></td></tr><br>
+ <tr><td><input type="button" id="1" value= "Add Account" onclick="addAccount()"></td></tr>
+ <tr><td><input type="button" id="2" value= "Show Records" onclick="showAccounts()"></td></tr><br>
+</table><br>
+
+<table style="border: solid 1px;" id="displaytable" >
+    <thead>
+        <tr><th>Target Table</th></tr>
+    <tr>
+        <th>BankID</th>
+        <th>Account Type</th>
+        <th>Account Number</th>
+    </tr>
+    </thead>
+    <tbody id="valid_body"></tbody>
+</table><br>
+
+ <table style="border: solid 1px;" id="errortable">
+    <thead>
+        <tr><th>Error Table</th></tr>
+    <tr>
+        <th>Sequence No</th>
+        <th>Record</th>
+        <th>Reason</th>
+    </tr>
+    </thead>
+    <tbody id="invalid_body"></tbody>
+</table>    
+
+<p id='demo'></p>
+<script>
+
+    var serial_number = 0;
+
+    var bank_id_array = [];
+    var account_type_array = [];
+    var account_number_array = [];
+
+    var invalid_serial_array = [];
+    var invalid_record_array = [];
+    var invalid_reason_array = [];
+
+    valid_body = document.getElementById('valid_body');
+    
+    invalid_body = document.getElementById('invalid_body'); 
+
+    var array_index = 0;
+    var invalid_array_index = 0;
+    
+    function addAccount()
+    {
+      
+        var bank_data = document.getElementById("bank_field").value;
+
+        var account_data = document.getElementById("account_field").value;
+
+        var message = '';
+
+        var bank_data_status = true;
+        var account_data_status = true;
+        
+        var bank_data_format = /^[A]{1}[0-9]{4}$/;
+
+        var account_data_format = /^[S|C|D]{1}[0-9]{8,10}$/;
+
+        var tr, td;
+
+        if(bank_data.match(bank_data_format))
+        {  
+
+            alert('Bank id matched');
+            if(account_data.match(account_data_format))
+            {
+                alert('Account number matched');
+
+                account_prefix =  account_data.substring(0,1).toUpperCase();
+
+                if(account_prefix == 'S' )
+                {
+                    account_type = "Savings";
+                }
+
+                if(account_prefix == 'C' )
+                {
+                    account_type = "Current";
+                }
+                
+                if(account_prefix == 'D' )
+                {
+                    account_type = "Demat";
+                }
+                
+            }
+            else
+            {
+                alert('Account number didnt matched');
+                account_data_status = false;
+            }
+        }
+        else
+        {
+            alert('Bank id didnt matched');
+            alert('Account number didnt matched');
+            bank_data_status = false;  
+            account_data_status = false;
+        }
+
+        if(! bank_data_status )
+        {  
+            if(!account_data_status)
+            {
+                message = "Bank_id, Account Number is not Valid";
+            }
+            else
+            {
+                message = "Bank_id is not Valid";
+            }
+
+            if( (! invalid_record_array.includes(bank_data) && (bank_data != '')))
+            {
+                invalid_serial_array.push(++serial_number);
+                invalid_record_array.push(bank_data)
+                invalid_reason_array.push(message)
+            }
+            
+        }           
+        else
+        {
+            if(! bank_id_array.includes(bank_data) )
+            {   
+                bank_id_array.push(bank_data);
+                account_type_array.push(account_type);
+                account_number_array.push(account_data);
+            }
+            else
+            {   
+                // if(((invalid_record_array.indexOf(bank_data)) && (invalid_record_array.includes(account_data))))
+                if( ! (invalid_record_array.includes(bank_data)) )                    
+                {
+                    invalid_serial_array.push(++serial_number);
+                    invalid_record_array.push(bank_data);
+                    invalid_reason_array.push('Already Exists');
+
+                }
+            }
+        }
+
+    }
+
+    function showAccounts()
+    {
+        bank_data = document.getElementById("bank_field").value;
+        account_data = document.getElementById("account_field").value
+
+        if(! ( (bank_data == '' ) && (account_data == '' ) ) )
+        {   
+            alert('Bank array length: ' + bank_id_array.length);
+
+            alert('invalid array length: ' + invalid_record_array.length);
+            
+            alert( "BANK Id : " + typeof(bank_data) );
+
+            alert('Bank array data : ' + bank_id_array );
+            alert( "Invalid array data: " + invalid_record_array) ;
+
+            for(var i=array_index; i < bank_id_array.length; i++)
+            {
+                tr = valid_body.insertRow(valid_body.rows.length);
+
+                td = tr.insertCell(tr.cells.length);
+                td.innerHTML = bank_id_array[i];
+
+                td = tr.insertCell(tr.cells.length);
+                td.innerHTML = account_type_array[i];
+
+                td = tr.insertCell(tr.cells.length);
+                td.innerHTML = account_number_array[i];
+                ++ array_index;
+            }
+
+            for(var j=invalid_array_index; j < invalid_record_array.length; j++)
+            {
+                tr = invalid_body.insertRow(invalid_body.rows.length);
+
+                td = tr.insertCell(tr.cells.length);
+                td.innerHTML = invalid_serial_array[j];
+
+                td = tr.insertCell(tr.cells.length);
+                td.innerHTML = invalid_record_array[j];
+
+                td = tr.insertCell(tr.cells.length);
+                td.innerHTML = invalid_reason_array[j];
+                ++ invalid_array_index;
+            }
+ 
+        }
+        else
+        {
+            alert('Please fill the data');
+            
+        }
+
+        document.getElementById("bank_field").value = "";
+        document.getElementById("account_field").value = "";
+
+    }
+</script>
+</body>
+</html>
+
